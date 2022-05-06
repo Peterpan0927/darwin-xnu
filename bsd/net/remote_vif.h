@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012 Apple Computer, Inc. All rights reserved.
+ * Copyright (c) 2010-2021 Apple Inc. All rights reserved.
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
  *
@@ -26,17 +26,30 @@
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
 
-#ifndef _OS_OSRUNTIME_H
-#define _OS_OSRUNTIME_H
+#ifndef __REMOTE_VIF_H__
+#define __REMOTE_VIF_H__
 
-#include <libkern/OSBase.h>
+#include <sys/proc.h>
+#include <net/if.h>
+#include <net/bpf.h>
 
-__BEGIN_DECLS
+#include <net/pktap.h>
 
-extern void *kern_os_malloc(size_t size) __attribute__((alloc_size(1)));
-extern void *kern_os_realloc(void * addr, size_t size) __attribute__((alloc_size(2)));
-extern void kern_os_free(void * address);
+#define RVI_CONTROL_NAME        "com.apple.net.rvi_control"
+#define RVI_BUFFERSZ            (64 * 1024)
+#define RVI_VERSION_1           0x1
+#define RVI_VERSION_2           0x2
+#define RVI_VERSION_CURRENT     RVI_VERSION_2
 
-__END_DECLS
+enum  {
+	RVI_COMMAND_OUT_PAYLOAD         = 0x01,
+	RVI_COMMAND_IN_PAYLOAD          = 0x10,
+	RVI_COMMAND_GET_INTERFACE       = 0x20,
+	RVI_COMMAND_VERSION             = 0x40
+};
 
-#endif /* _OS_OSRUNTIME_H */
+#ifdef XNU_KERNEL_PRIVATE
+int rvi_init(void);
+#endif /* XNU_KERNEL_PRIVATE */
+
+#endif /* __REMOTE_VIF_H__ */

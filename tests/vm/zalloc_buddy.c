@@ -4,6 +4,11 @@
 #include <mach/mach.h>
 #include <sys/mman.h>
 
+T_GLOBAL_META(
+	T_META_NAMESPACE("xnu.vm"),
+	T_META_RADAR_COMPONENT_NAME("xnu"),
+	T_META_RADAR_COMPONENT_VERSION("zalloc"));
+
 #undef __abortlike
 #define __abortlike
 #define panic(fmt, ...) ({ T_FAIL(fmt, __VA_ARGS__); abort(); })

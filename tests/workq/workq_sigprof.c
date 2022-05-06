@@ -12,7 +12,12 @@
 
 #if !defined(__arm__)
 
-T_GLOBAL_META(T_META_RUN_CONCURRENTLY(true));
+T_GLOBAL_META(
+	T_META_NAMESPACE("xnu.workq"),
+	T_META_RADAR_COMPONENT_NAME("xnu"),
+	T_META_RADAR_COMPONENT_VERSION("workq"),
+	T_META_RUN_CONCURRENTLY(true));
+
 
 static pthread_t workq_thread;
 static bool signal_received;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Apple Inc. All rights reserved.
+ * Copyright (c) 2021 Apple Inc. All rights reserved.
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
  *
@@ -26,20 +26,54 @@
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
 
-#ifndef _KERN_SUID_CRED_H
-#define _KERN_SUID_CRED_H
+#if (DEVELOPMENT || DEBUG) && !KASAN
 
-#if XNU_KERNEL_PRIVATE
+#include <sys/sysctl.h>
+#include <libkern/stack_protector.h>
 
-#include <kern/kern_types.h>
-#include <mach/mach_types.h>
+__attribute__((noinline))
+static int
+check_for_cookie(const char *str, size_t len)
+{
+	long buf[4];
+	long *search = (long *)(void *)&buf[0];
+	size_t n;
 
-struct vnode;
+	assert(len < sizeof(buf));
+	assert(__stack_chk_guard != 0);
+	assert(((uintptr_t)search & (sizeof(long) - 1)) == 0);
 
-extern ipc_port_t convert_suid_cred_to_port(suid_cred_t);
+	/* force compiler to insert stack cookie check: */
+	memcpy(buf, str, len);
 
-extern int suid_cred_verify(ipc_port_t port, struct vnode *vnode, uint32_t *uid);
+	/* 32 x sizeof(long) should be plenty to find the cookie: */
+	for (n = 0; n < 32; ++n) {
+		if (*(search++) == __stack_chk_guard) {
+			return 0;
+		}
+	}
 
-#endif /* XNU_KERNEL_PRIVATE */
+	return ESRCH;
+}
 
-#endif /* _KERN_SUID_CRED_H */
+static int
+sysctl_run_stack_chk_tests SYSCTL_HANDLER_ARGS
+{
+	#pragma unused(arg1, arg2, oidp)
+
+	unsigned int dummy = 0;
+	int error, changed = 0, kr;
+	error = sysctl_io_number(req, 0, sizeof(dummy), &dummy, &changed);
+	if (error || !changed) {
+		return error;
+	}
+
+	kr = check_for_cookie("foo", 3);
+	return kr;
+}
+
+SYSCTL_PROC(_kern, OID_AUTO, run_stack_chk_tests,
+    CTLTYPE_INT | CTLFLAG_RW | CTLFLAG_LOCKED | CTLFLAG_MASKED,
+    0, 0, sysctl_run_stack_chk_tests, "I", "");
+
+#endif /* (DEVELOPMENT || DEBUG) && !KASAN */
