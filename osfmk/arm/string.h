@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Apple Inc. All rights reserved.
+ * Copyright (c) 2022 Apple Inc. All rights reserved.
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
  *
@@ -26,13 +26,24 @@
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
 
-#ifndef _VOUCHER_IPC_PTHREAD_PRIORITY_INTERNAL_H_
-#define _VOUCHER_IPC_PTHREAD_PRIORITY_INTERNAL_H_
+#ifndef _ARM_STRING_H_
+#define _ARM_STRING_H_
 
-#define PTHPRIORITY_ATTR_DEFAULT_VALUE (0)
+/*
+ * memory functions
+ */
+#define __arch_bcopy                    1
+#define __arch_bzero                    1
+#define __arch_memcmp_zero_ptr_aligned  1
+#define __arch_memcpy                   1
+#define __arch_memmove                  1
+#define __arch_memset                   1
 
-#if CONFIG_VOUCHER_DEPRECATED
-extern void ipc_pthread_priority_init(void);
-#endif /* CONFIG_VOUCHER_DEPRECATED */
+/*
+ * string functions
+ */
+#define __arch_strlen                   1
+#define __arch_strncmp                  1
+#define __arch_strnlen                  1
 
-#endif /* _VOUCHER_IPC_PTHREAD_PRIORITY_INTERNAL_H_ */
+#endif /* _ARM_STRING_H_ */
